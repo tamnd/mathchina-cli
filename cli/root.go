@@ -1,5 +1,4 @@
-// Package cli assembles the cmo command tree from the mathchina
-// domain on top of the any-cli/kit framework.
+// Package cli assembles the cmo command tree.
 package cli
 
 import (
@@ -14,21 +13,20 @@ var (
 	Date    = "unknown"
 )
 
-// NewApp assembles the kit application from the mathchina domain. The
-// domain's Register installs the client factory and every operation, so the
-// binary and a host (ant, which blank-imports the package) share one source of
-// truth. kit.Run turns the App into the CLI, plus the serve and mcp surfaces and
-// the typed-error-to-exit-code mapping.
-//
-// To add a command, declare it in mathchina/domain.go with kit.Handle and it
-// appears here automatically. Reach for app.AddCommand only for a verb that does
-// not fit the emit-records shape, the way version does below.
+// NewApp assembles the kit application. Commands are added as kit
+// escape-hatch commands and call the mathchina client.
 func NewApp() *kit.App {
 	id := mathchina.Domain{}.Info().Identity
 	id.Version = Version
 
 	app := kit.New(id)
 	(mathchina.Domain{}).Register(app)
+
+	app.AddCommand(newListCmd())
+	app.AddCommand(newProblemCmd())
+	app.AddCommand(newSearchCmd())
+	app.AddCommand(newForumsCmd())
 	app.AddCommand(newVersionCmd())
+
 	return app
 }
